@@ -22,8 +22,11 @@ export class GuestController {
 
     const result = await rService.get(id)
     if (result.error) {
-      return res.sendStatus(404)
+      return res.status(result.error.code).send({
+        error: result.error,
+      })
     }
+
     return res.json(result.value).send()
   }
 
@@ -40,7 +43,7 @@ export class GuestController {
     const result = await rService.create(req.body)
     if (result.error) {
       Winston.error(result.error)
-      return res.send({
+      return res.status(result.error.code).send({
         error: {
           message: 'Internal error creating record',
         },

@@ -15,7 +15,7 @@ export class RestaurantController {
   ): Promise<Response<ServiceResult<RestaurantDTO>>> {
     const rService = new RestaurantService()
     if (!isAuthorized(req)) {
-      return res.sendStatus(403)
+      return res.sendStatus(404)
     }
 
     let id: number = parseInt(req.params.id, 10)
@@ -25,8 +25,11 @@ export class RestaurantController {
 
     const result = await rService.get(id)
     if (result.error) {
-      return res.sendStatus(404)
+      return res.status(result.error.code).send({
+        error: result.error,
+      })
     }
+
     return res.json(result.value).send()
   }
 
@@ -42,10 +45,8 @@ export class RestaurantController {
 
     const result = await rService.create(req.body)
     if (result.error) {
-      return res.status(400).send({
-        error: {
-          message: 'Internal error creating record',
-        },
+      return res.status(result.error.code).send({
+        error: result.error,
       })
     }
 

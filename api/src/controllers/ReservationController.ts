@@ -105,7 +105,7 @@ export class ReservationController {
     )
 
     if (availability.value.length === 0 || !availability.value.some(x => x.count !== 0)) {
-      return res.json({
+      return res.status(403).json({
         error: { code: 403, message: 'There is no availability for reservations.' },
       })
     }
