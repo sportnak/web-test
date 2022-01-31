@@ -3,7 +3,7 @@ import faker from 'faker'
 import autocannon from 'autocannon'
 
 const startRange = '2022-01-30T15:30:00.000Z'
-const endRange = '2022-01-31T15:30:00.000Z'
+const endRange = '2022-03-31T15:30:00.000Z'
 const stuffToCheck = []
 const validIntervals = {}
 const MAX_PARTY_RANGE = 20
@@ -49,6 +49,7 @@ function isInvaildTimeIntervals(restaurantId, start, end) {
 
 let requestCount = 0
 let averageTime = 0
+const results = []
 async function bandwithTest() {
   const restaurants = await Promise.all(
     new Array(1).fill(1).map(async _ => {
@@ -68,7 +69,7 @@ async function bandwithTest() {
       url: 'http://localhost:9090/reservation',
       connections: 20, //default
       pipelining: 1, // default
-      duration: 1, // default
+      duration: 10, // default
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,13 +81,14 @@ async function bandwithTest() {
             requests++
             return context
           },
+          onResponse: statusCode => {
+            results.push(statusCode)
+          },
         },
       ],
     })
-    console.log(requests)
-    autocannon.track(cannon, { renderProgressBar: false })
+    autocannon.track(cannon, { renderProgressBar: true })
   }
-  console.log('Done', generatedRequests)
   return
 }
 export async function createRestaurant() {
