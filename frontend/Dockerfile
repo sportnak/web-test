@@ -7,6 +7,7 @@ COPY ./frontend /app
 
 RUN yarn add global @vue/cli
 RUN yarn
+RUN yarn build
 
 
 EXPOSE 8080
