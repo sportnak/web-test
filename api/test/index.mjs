@@ -47,48 +47,61 @@ function isInvaildTimeIntervals(restaurantId, start, end) {
   return false
 }
 
-let requestCount = 0
-let averageTime = 0
+const args = process.argv.slice(2)
+let REST_COUNT = 1
+let I_COUNT = 1
+for (const arg of args) {
+  const restaurants = arg.match(/--restaurants=(\d+)/)
+  if (restaurants?.[1]) {
+    REST_COUNT = parseInt(restaurants[1])
+    continue
+  }
+
+  const inventories = arg.match(/--inventory=(\d+)/)
+  if (inventories?.[1]) {
+    I_COUNT = parseInt(inventories[1])
+  }
+}
+
 const results = []
 async function bandwithTest() {
   const restaurants = await Promise.all(
-    new Array(1).fill(1).map(async _ => {
+    new Array(REST_COUNT).fill(1).map(async _ => {
       return await createRestaurant()
     })
   )
 
   for (const restaurantId of restaurants) {
-    console.log(`Creating inventory for ${restaurantId}`)
-    for (let i = 0; i < 1; i++) {
+    console.log(`Creating ${I_COUNT} inventory for ${restaurantId}`)
+    for (let i = 0; i < I_COUNT; i++) {
       await createInventory(restaurantId)
     }
-
-    console.log(`Creating reservations for ${restaurantId}`)
-    let requests = 0
-    const cannon = autocannon({
-      url: 'http://localhost:9090/reservation',
-      connections: 20, //default
-      pipelining: 1, // default
-      duration: 10, // default
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      requests: [
-        {
-          setupRequest: context => {
-            context.body = JSON.stringify(generateReservation(restaurantId))
-            requests++
-            return context
-          },
-          onResponse: statusCode => {
-            results.push(statusCode)
-          },
-        },
-      ],
-    })
-    autocannon.track(cannon, { renderProgressBar: true })
   }
+
+  console.log(`Creating reservations for`)
+  const cannon = autocannon({
+    url: 'http://localhost:9090/reservation',
+    connections: 20, //default
+    pipelining: 1, // default
+    duration: 10, // default
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    requests: [
+      {
+        setupRequest: context => {
+          context.body = JSON.stringify(generateReservation(restaurants))
+          return context
+        },
+        onResponse: statusCode => {
+          results.push(statusCode)
+        },
+      },
+    ],
+  })
+  autocannon.track(cannon, { renderProgressBar: true })
+
   return
 }
 export async function createRestaurant() {
@@ -153,8 +166,9 @@ async function createInventory(restaurantId) {
   }
 }
 
-let generatedRequests = 0
-function generateReservation(restaurantId) {
+function generateReservation(restaurantIds) {
+  const randomIndex2 = Math.max(0, faker.datatype.number(restaurantIds.length) - 1)
+  const restaurantId = restaurantIds[randomIndex2]
   const times = Object.keys(validIntervals[restaurantId])
   const randomIndex = Math.max(0, faker.datatype.number(times.length) - 1)
   const time = times[randomIndex]
@@ -167,7 +181,6 @@ function generateReservation(restaurantId) {
     time,
   }
 
-  generatedRequests++
   return body
 }
 

@@ -8,7 +8,9 @@ See specification document [here](https://docs.google.com/document/d/1_TnxJx21ML
 
 # Benchmarking
 
-- run `node ./api/test/index.mjs`
+I've created a sample benchmark script that creates 1 restaurant 1 inventory (configurable) and then creates as many reservations as possible.
+
+- run `node ./api/test/index.mjs --restaurants={number | default is 1 } --inventory={number | default is 1}`
 
 # API Definiton (For relevant routes):
 
