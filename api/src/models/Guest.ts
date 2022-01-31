@@ -8,19 +8,25 @@ import {
   Table,
   UpdatedAt,
 } from 'sequelize-typescript'
-import { Inventory, Reservation } from '.'
+import { Reservation } from '.'
 
-@Table({ tableName: 'restaurants' })
-export class Restaurant extends Model<Restaurant> {
+@Table({ tableName: 'guests' })
+export class Guest extends Model<Guest> {
   @PrimaryKey
   @Column({ autoIncrement: true })
   id: number
 
-  @Column({ allowNull: false })
+  @Column
   name: string
 
-  @Column({ allowNull: true })
-  address: string
+  @Column
+  email: string
+
+  @Column
+  guestCount: number
+
+  @Column
+  timestamp: Date
 
   @DeletedAt
   deleted_at: string
@@ -30,9 +36,6 @@ export class Restaurant extends Model<Restaurant> {
 
   @UpdatedAt
   updated_at: string
-
-  @HasMany(() => Inventory)
-  inventory: Inventory
 
   @HasMany(() => Reservation)
   reservations: Reservation[]
